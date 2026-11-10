@@ -27,6 +27,7 @@
 |:---|:---|
 | [**📦 product/**](product/README.md) | The spec with its Won't list, and the build plan that marks Slices 0 to 3 as the MVP. |
 | [**⚖️ ADR-001**](decisions/adr-001-typescript-shared-core.md) | Why one TypeScript core serves both the CLI and the browser demo, and why the lock-file format is the one decision that's hard to undo. |
+| [**🔎 Gate check**](reports/2026-gate-check.md) | Falsifier 1: whether Snyk agent-scan or Pipelock already hashes annotations and shows a per-field diff (neither does both, checked 2026-11-10). |
 
 <p align="right">(<a href="#docs-top">back to top</a>)</p>
 

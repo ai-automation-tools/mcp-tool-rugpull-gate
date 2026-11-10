@@ -23,7 +23,8 @@ A lock file for MCP tool definitions, with a diff a tired reviewer can read. The
 A static browser demo on GitHub Pages runs the same engine on two pasted `tools/list` blobs and
 shows a planted `send_customer_email` drift as a banner on first load.
 
-The wedge against Snyk agent-scan, Pipelock and leanproxy, which already pin tool hashes: a
+The wedge against Snyk agent-scan, Pipelock and leanproxy, which pin (or once pinned) tool
+hashes (see `docs/reports/2026-gate-check.md`): a
 committed lock file, a reviewer-grade per-field diff with annotation flips named, no account,
 no proxy, no network. It **reports** drift. It does not sit in the call path and cannot block
 a call.
