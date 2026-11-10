@@ -15,6 +15,9 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 ## Unreleased
 
+**Docs**
+- Gate check (falsifier 1) in `docs/reports/2026-gate-check.md`: Pipelock hashes annotations but shows only a description-length and parameter-name summary; Snyk agent-scan keeps no local tool hash and never hashed more than the description. Neither does both, so the build goes on. *Slice 0: Gate check*
+
 ## 2026-11-08
 
 **Added**

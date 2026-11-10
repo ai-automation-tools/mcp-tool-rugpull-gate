@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/now-slice_0:_gate_check-F59E0B?style=for-the-badge" alt="Now: Slice 0, gate check">
+  <img src="https://img.shields.io/badge/now-slice_1:_canonicalise,_lock,_diff-F59E0B?style=for-the-badge" alt="Now: Slice 1, canonicalise, lock, diff">
   <img src="https://img.shields.io/badge/stage-incubating-2ea44f?style=for-the-badge" alt="Stage: incubating">
   <a href="README.md"><img src="https://img.shields.io/badge/↩-docs_home-6B7280?style=for-the-badge" alt="Back to docs"></a>
 </p>
@@ -29,9 +29,9 @@ check. Slices 1 to 3 are the three features above the line, and deploying Slice 
 live-demo item in the release phase. Every slice is tested against fixture `tools/list` files
 this repo owns, with fictional servers; no item needs a running MCP server or network access.
 
-## 🧭 Slice 0: Gate check
+## 🧭 Slice 0: Gate check (done 2026-11-10)
 
-- [ ] `small` **Is this already built? (falsifier 1).** Write `docs/reports/2026-gate-check.md`: read the docs and source of Snyk agent-scan and Pipelock and answer two questions for each, does it hash tool annotations, and does it show a reviewer a readable per-field diff (description, schema, annotations) of what changed? Link each repo or doc, say when it was checked, and end with a one-line verdict. If either tool does **both**, add a `🔒 Needs owner` item under this one asking whether to stop and PARK (the build plan's first stop rule) and build nothing else until Mike answers. Link the report from `docs/README.md`.
+- [x] `small` **Is this already built? (falsifier 1).** Write `docs/reports/2026-gate-check.md`: read the docs and source of Snyk agent-scan and Pipelock and answer two questions for each, does it hash tool annotations, and does it show a reviewer a readable per-field diff (description, schema, annotations) of what changed? Link each repo or doc, say when it was checked, and end with a one-line verdict. If either tool does **both**, add a `🔒 Needs owner` item under this one asking whether to stop and PARK (the build plan's first stop rule) and build nothing else until Mike answers. Link the report from `docs/README.md`. — done 2026-11-10: `docs/reports/2026-gate-check.md`, linked from `docs/README.md`; Pipelock hashes annotations but has no per-field diff, agent-scan does neither, so no stop question
 
 ## 🔒 Slice 1: Canonicalise, lock, diff
 
