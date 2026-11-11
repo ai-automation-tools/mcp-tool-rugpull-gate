@@ -12,9 +12,9 @@
 
 ---
 
-The MCP-Tool-Rugpull-Gate Weekly Roadmap routine works this file top to bottom every Tuesday,
-Thursday and Saturday: it takes the first open item that isn't `🔒 Needs owner` (or up to six
-`small` ones), builds it, ticks it and opens a `roadmap/auto-<date>` PR. **Every item above
+The MCP-Tool-Rugpull-Gate roadmap routine works this file top to bottom, one item per run, as
+`roadmap/auto-` PRs: it takes the first open item that isn't `🔒 Needs owner` (or up to six
+`small` ones), builds it and ticks it. **Every item above
 `## After public release` is a release gate.** The repo goes public when all of them are ticked
 and Mike says so. Ticking an item adds its line to the [changelog](CHANGELOG.md) and updates any
 doc it made stale, in the same commit.
