@@ -33,7 +33,7 @@ this repo owns, with fictional servers; no item needs a running MCP server or ne
 
 - [x] `small` **Is this already built? (falsifier 1).** Write `docs/reports/2026-gate-check.md`: read the docs and source of Snyk agent-scan and Pipelock and answer two questions for each, does it hash tool annotations, and does it show a reviewer a readable per-field diff (description, schema, annotations) of what changed? Link each repo or doc, say when it was checked, and end with a one-line verdict. If either tool does **both**, add a `🔒 Needs owner` item under this one asking whether to stop and PARK (the build plan's first stop rule) and build nothing else until Mike answers. Link the report from `docs/README.md`. — done 2026-11-10: `docs/reports/2026-gate-check.md`, linked from `docs/README.md`; Pipelock hashes annotations but has no per-field diff, agent-scan does neither, so no stop question
 
-## 🔒 Slice 1: Canonicalise, lock, diff (done 2026-11-14)
+## 🔨 Slice 1: Canonicalise, lock, diff (done 2026-11-14)
 
 - [x] **Lock and diff a snapshot** (MVP feature 1). A pure core module (no Node imports, ADR-001) canonicalises each tool in a `tools/list` result: name, title, description, `inputSchema`, `outputSchema`, annotations, keys sorted, empty values dropped, the same field set as leanproxy PR 352. It hashes the canonical form with SHA-256 through Web Crypto. `rugpull-gate lock <tools-list.json> --server <id>` writes `mcp-tools.lock.json` with a `lockVersion` field and, per tool, the hash and the full approved definition. `rugpull-gate check <tools-list.json>` reports every tool as unchanged, changed, cosmetic-only, new or removed, and for a changed tool gives the description diff word by word, schema properties added, removed or changed, and annotation values before and after. Tests: key order and whitespace alone give "unchanged"; a title-only change is cosmetic-only; every canonicalisation rule has a passing and a failing fixture; a corrupt lock file is refused and left untouched. CI runs on `ubuntu-latest` and `windows-latest`. — done 2026-11-14: pure core in `src/canonical.ts`, `src/lockfile.ts`, `src/diff.ts` and `src/report.ts` (Web Crypto hash, no Node imports), `lock` and `check` in `src/cli.ts`, rule-pair and acceptance tests in `tests/core.test.ts` and `tests/cli.test.ts` on the fictional `fernhill-helpdesk` fixtures, CI matrix on Ubuntu and Windows
 
@@ -60,7 +60,7 @@ this repo owns, with fictional servers; no item needs a running MCP server or ne
 
 Nothing below blocks go-live.
 
-## 🧩 Next slices
+### 🧩 Next slices
 
 - [ ] **Slice 4: opt-in live fetch.** `rugpull-gate fetch` reads `tools/list` from a stdio or streamable-HTTP server, behind an explicit flag and a clear "this runs the server" warning. If it needs more than 5 runs, stop and write up (falsifier 4).
 - [ ] **Slice 5: watch mode.** Re-check on `notifications/tools/list_changed`.
