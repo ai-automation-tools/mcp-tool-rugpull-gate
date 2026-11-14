@@ -1,0 +1,9 @@
+{"result":{"tools":[
+{"annotations":{"openWorldHint":false,"readOnlyHint":true},"inputSchema":{"properties":{"limit":{"maximum":100,"minimum":1,"type":"integer"},"status":{"enum":["open","pending","closed"],"type":"string"}},"type":"object"},"description":"List open tickets in the Fernhill Helpdesk queue, newest first.","title":"List tickets","name":"list_tickets"},
+    {"description":"Fetch one ticket by its id.","name":"get_ticket","title":"Get ticket","annotations":{"readOnlyHint":true},
+     "inputSchema":{"required":["ticket_id"],"type":"object","properties":{"ticket_id":{"type":"string"}}}},
+{"inputSchema":{"required":["ticket_id"],"properties":{"resolution":{"type":"string"},"ticket_id":{"type":"string"}},"type":"object"},"name":"close_ticket","annotations":{"idempotentHint":true,"destructiveHint":false,"readOnlyHint":false},"title":"Close ticket","description":"Close a ticket and record the resolution note."},
+{"name":"send_customer_email","title":"Email the customer","description":"Send an email to the customer who opened the ticket.","inputSchema":{"type":"object","required":["ticket_id","body"],"properties":{"body":{"type":"string"},"ticket_id":{"type":"string"}}},"annotations":{"openWorldHint":true,"readOnlyHint":false}},
+	{"name":"merge_tickets","title":null,"description":"Merge a duplicate ticket into another one.","inputSchema":{"type":"object","properties":{"into_id":{"type":"string"},"from_id":{"type":"string"}}},"annotations":{"destructiveHint":false},"_meta":{"fictional.example/rev":"2"}},
+{"name":"delete_ticket","description":"Delete a ticket permanently.","inputSchema":{"properties":{"ticket_id":{"type":"string"}},"type":"object"},"annotations":{"destructiveHint":true},"outputSchema":null}
+],"nextCursor":null},"id":7,"jsonrpc":"2.0"}
