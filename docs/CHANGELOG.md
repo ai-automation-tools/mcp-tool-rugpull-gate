@@ -19,6 +19,7 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 - `rugpull-gate lock <tools-list.json> --server <id>` writes `mcp-tools.lock.json` (`lockVersion` 1) with each tool's SHA-256 and canonical definition, and refuses to overwrite a lock file it can't verify; `rugpull-gate check` reports every tool as unchanged, cosmetic-only, changed, new or removed, with a word-level description diff, schema paths added, removed or changed, and annotation values before and after, exiting 1 on drift and 2 on bad input. The canonical form follows leanproxy PR 352's field set and rules, and every rule has a firing and a non-firing test. CI now runs on Ubuntu and Windows. *Slice 1: Canonicalise, lock, diff*
 
 **Docs**
+- Roadmap sweep: the Slice 1 heading had a lock emoji (the owner-tag marker) and now uses the build emoji; "Next slices" is a ### group under the post-release heading.
 - Roadmap rechecked against the org's 2026-11 requirements: the intro names the roadmap routine instead of its days.
 - Gate check (falsifier 1) in `docs/reports/2026-gate-check.md`: Pipelock hashes annotations but shows only a description-length and parameter-name summary; Snyk agent-scan keeps no local tool hash and never hashed more than the description. Neither does both, so the build goes on. *Slice 0: Gate check*
 
