@@ -4,23 +4,32 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { InputError, parseToolsList } from "./canonical.ts";
+import { hashDefinition, InputError, parseToolsList } from "./canonical.ts";
 import { checkServer } from "./diff.ts";
-import { emptyLockfile, lockServer, parseLockfile, serialiseLockfile } from "./lockfile.ts";
-import { formatText } from "./report.ts";
+import { formatInventory } from "./inventory.ts";
+import { emptyLockfile, lockServer, parseLockfile, serialiseLockfile, type Lockfile } from "./lockfile.ts";
+import { formatJson, formatText, highestRisk } from "./report.ts";
+import { rank, type Risk } from "./risk.ts";
 import { VERSION } from "./version.ts";
 
 export const DEFAULT_LOCK = "mcp-tools.lock.json";
+const FORMATS = ["text", "json", "inventory"];
+const FAIL_ON = ["low", "medium", "high"];
 
 const USAGE = `rugpull-gate ${VERSION}
 
 Usage:
   rugpull-gate lock <tools-list.json> --server <id> [--lock <path>]
   rugpull-gate check <tools-list.json> [--server <id>] [--lock <path>]
+                     [--fail-on low|medium|high] [--format text|json|inventory]
+  rugpull-gate approve <tool> <tools-list.json> [--server <id>] [--lock <path>]
 
-lock   writes the hash and definition of every tool to the lock file (${DEFAULT_LOCK})
-check  reports each tool as unchanged, cosmetic-only, changed, new or removed;
-       exits 1 when any tool is changed, new or removed, 2 on bad input`;
+lock     writes the hash and definition of every tool to the lock file (${DEFAULT_LOCK})
+check    reports each tool as unchanged, cosmetic-only, changed, new or removed, with a risk
+         level and the reason for it; exits 1 when any tool's risk is at or above --fail-on
+         (default low; a title-only change is risk none and never counts), 2 on bad input
+approve  accepts one tool's definition from <tools-list.json> into the lock, or drops it
+         from the lock if the tools/list no longer has it; every other entry is left as is`;
 
 export type RunResult = { code: number; stdout: string; stderr: string };
 
@@ -40,7 +49,22 @@ function readToolsList(path: string, cwd: string) {
   return parseToolsList(text, path);
 }
 
-export async function run(argv: string[], cwd = process.cwd()): Promise<RunResult> {
+/** The server to check or approve: --server, or the lock's only one. */
+function pickServer(lock: Lockfile, lockLabel: string, server: string | undefined): string {
+  const ids = Object.keys(lock.servers);
+  if (server === undefined) {
+    if (ids.length !== 1) {
+      throw new InputError(`${lockLabel} holds ${ids.length} servers; pick one with --server (${ids.join(", ")})`);
+    }
+    return ids[0];
+  }
+  if (!Object.hasOwn(lock.servers, server)) {
+    throw new InputError(`${lockLabel} has no server "${server}" (it has: ${ids.join(", ") || "none"})`);
+  }
+  return server;
+}
+
+export async function run(argv: string[], cwd = process.cwd(), now = new Date()): Promise<RunResult> {
   try {
     let parsed;
     try {
@@ -50,6 +74,8 @@ export async function run(argv: string[], cwd = process.cwd()): Promise<RunResul
         options: {
           server: { type: "string" },
           lock: { type: "string", default: DEFAULT_LOCK },
+          format: { type: "string", default: "text" },
+          "fail-on": { type: "string", default: "low" },
           version: { type: "boolean" },
           help: { type: "boolean", short: "h" },
         },
@@ -59,11 +85,19 @@ export async function run(argv: string[], cwd = process.cwd()): Promise<RunResul
     }
     const { values, positionals } = parsed;
     if (values.version) return { code: 0, stdout: `rugpull-gate ${VERSION}\n`, stderr: "" };
-    const [command, input, ...extra] = positionals;
+    const [command, ...args] = positionals;
     if (values.help || command === undefined) return { code: 0, stdout: `${USAGE}\n`, stderr: "" };
-    if (command !== "lock" && command !== "check") throw new InputError(`unknown command "${command}"\n\n${USAGE}`);
-    if (input === undefined) throw new InputError(`${command} needs a tools/list JSON file\n\n${USAGE}`);
-    if (extra.length > 0) throw new InputError(`unexpected argument "${extra[0]}"`);
+    if (command !== "lock" && command !== "check" && command !== "approve") {
+      throw new InputError(`unknown command "${command}"\n\n${USAGE}`);
+    }
+    const wanted = command === "approve" ? 2 : 1;
+    if (args.length < wanted) {
+      const what = command === "approve" ? "a tool name and a tools/list JSON file" : "a tools/list JSON file";
+      throw new InputError(`${command} needs ${what}\n\n${USAGE}`);
+    }
+    if (args.length > wanted) throw new InputError(`unexpected argument "${args[wanted]}"`);
+    if (!FORMATS.includes(values.format)) throw new InputError(`--format must be one of ${FORMATS.join(", ")}`);
+    if (!FAIL_ON.includes(values["fail-on"])) throw new InputError(`--fail-on must be one of ${FAIL_ON.join(", ")}`);
 
     const lockLabel = values.lock;
     const lockPath = resolve(cwd, lockLabel);
@@ -78,7 +112,7 @@ export async function run(argv: string[], cwd = process.cwd()): Promise<RunResul
       } catch (e) {
         throw new InputError(`${(e as Error).message}; refusing to overwrite it`);
       }
-      const tools = readToolsList(input, cwd);
+      const tools = readToolsList(args[0], cwd);
       lock.servers[values.server] = await lockServer(tools);
       writeFileSync(lockPath, serialiseLockfile(lock));
       return {
@@ -89,20 +123,51 @@ export async function run(argv: string[], cwd = process.cwd()): Promise<RunResul
     }
 
     if (lockText === undefined) throw new InputError(`${lockLabel} not found; run "rugpull-gate lock" first`);
-    const lock = await parseLockfile(lockText, lockLabel);
-    const ids = Object.keys(lock.servers);
-    let server = values.server;
-    if (server === undefined) {
-      if (ids.length !== 1) {
-        throw new InputError(`${lockLabel} holds ${ids.length} servers; pick one with --server (${ids.join(", ")})`);
+
+    if (command === "approve") {
+      const [tool, input] = args;
+      let lock;
+      try {
+        lock = await parseLockfile(lockText, lockLabel);
+      } catch (e) {
+        throw new InputError(`${(e as Error).message}; refusing to overwrite it`);
       }
-      server = ids[0];
-    } else if (!Object.hasOwn(lock.servers, server)) {
-      throw new InputError(`${lockLabel} has no server "${server}" (it has: ${ids.join(", ") || "none"})`);
+      const server = pickServer(lock, lockLabel, values.server);
+      const entries = lock.servers[server].tools;
+      const def = readToolsList(input, cwd).find((t) => t.name === tool);
+      const locked = Object.hasOwn(entries, tool) ? entries[tool] : undefined;
+      let message;
+      if (def) {
+        const hash = await hashDefinition(def);
+        if (locked?.hash === hash) {
+          return { code: 0, stdout: `${tool} already matches ${lockLabel}; nothing to approve\n`, stderr: "" };
+        }
+        entries[tool] = { hash, definition: def };
+        message = `Approved ${locked ? "the new definition of" : "new tool"} ${tool} for server ${server} in ${lockLabel}`;
+      } else if (locked) {
+        delete entries[tool];
+        message = `Dropped ${tool} from server ${server} in ${lockLabel}; ${input} no longer lists it`;
+      } else {
+        throw new InputError(`tool "${tool}" is in neither ${lockLabel} (server ${server}) nor ${input}`);
+      }
+      writeFileSync(lockPath, serialiseLockfile(lock));
+      return { code: 0, stdout: `${message}\n`, stderr: "" };
     }
+
+    const lock = await parseLockfile(lockText, lockLabel);
+    const server = pickServer(lock, lockLabel, values.server);
+    const input = args[0];
     const results = await checkServer(lock.servers[server], readToolsList(input, cwd));
-    const drift = results.some((r) => r.status === "changed" || r.status === "new" || r.status === "removed");
-    return { code: drift ? 1 : 0, stdout: formatText(server, lockLabel, results), stderr: "" };
+    const failOn = values["fail-on"] as Risk;
+    // A title-only change is risk none, so it never reaches any --fail-on level.
+    const fail = rank(highestRisk(results)) >= rank(failOn);
+    const stdout =
+      values.format === "json"
+        ? formatJson(server, lockLabel, results)
+        : values.format === "inventory"
+          ? formatInventory(results, { server, lock: lockLabel, input, version: VERSION, now })
+          : formatText(server, lockLabel, results);
+    return { code: fail ? 1 : 0, stdout, stderr: "" };
   } catch (e) {
     // Bad input gets one line (plus usage where it helps), never a stack trace.
     const message = e instanceof InputError ? e.message : `unexpected error: ${(e as Error).message}`;

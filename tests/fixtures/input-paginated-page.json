@@ -1,0 +1,1 @@
+{"jsonrpc": "2.0", "id": 2, "result": {"tools": [{"name": "list_tickets", "description": "List open tickets."}], "nextCursor": "page-2"}}
