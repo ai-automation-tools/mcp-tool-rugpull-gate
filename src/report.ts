@@ -1,7 +1,8 @@
-// Text report for `check`. Pure: no Node built-ins (ADR-001).
+// Text and JSON reports for `check`. Pure: no Node built-ins (ADR-001).
 
 import { canonicalJson, type Json } from "./canonical.ts";
 import type { Change, Status, ToolResult } from "./diff.ts";
+import { highest, type Risk } from "./risk.ts";
 
 const STATUSES: Status[] = ["unchanged", "cosmetic-only", "changed", "new", "removed"];
 
@@ -40,9 +41,8 @@ function describe(field: string, c: Change): string {
 export function formatText(server: string, lockLabel: string, results: ToolResult[]): string {
   const lines = [`Server ${visible(server)}: ${results.length} tools checked against ${lockLabel}`];
   for (const r of results) {
-    lines.push(`  ${r.status.padEnd(13)} ${visible(r.name)}`);
-    const c = r.changes;
-    if (!c) continue;
+    lines.push(`  ${r.status.padEnd(13)} ${visible(r.name)}${r.status === "unchanged" ? "" : `  [risk ${r.risk}]`}`);
+    const c = r.changes ?? {};
     if (c.title) {
       const show = (t?: string) => (t === undefined ? "(none)" : JSON.stringify(visible(t)));
       lines.push(`      title: ${show(c.title.before)} -> ${show(c.title.after)}`);
@@ -56,8 +56,24 @@ export function formatText(server: string, lockLabel: string, results: ToolResul
     for (const field of ["inputSchema", "outputSchema", "annotations"] as const) {
       for (const change of c[field] ?? []) lines.push(`      ${describe(field, change)}`);
     }
+    for (const x of r.reasons) lines.push(`      risk ${x.level}: ${visible(x.reason)}`);
   }
-  const counts = STATUSES.map((s) => `${results.filter((r) => r.status === s).length} ${s}`);
-  lines.push(`Summary: ${counts.join(", ")}`);
+  const summary = Object.entries(counts(results)).map(([s, n]) => `${n} ${s}`).join(", ");
+  lines.push(`Summary: ${summary}; highest risk ${highestRisk(results)}`);
   return `${lines.join("\n")}\n`;
+}
+
+export function counts(results: ToolResult[]): Record<Status, number> {
+  return Object.fromEntries(STATUSES.map((s) => [s, results.filter((r) => r.status === s).length])) as Record<Status, number>;
+}
+
+export function highestRisk(results: ToolResult[]): Risk {
+  return highest(results.map((r) => r.risk));
+}
+
+/** The same report as data. Strings stay as the server sent them; JSON escapes every control
+ * character, and rendering the rest safely is the reader's job. */
+export function formatJson(server: string, lockLabel: string, results: ToolResult[]): string {
+  const doc = { server, lock: lockLabel, highestRisk: highestRisk(results), summary: counts(results), tools: results };
+  return `${JSON.stringify(doc, null, 2)}\n`;
 }

@@ -16,7 +16,8 @@ A lock file for MCP tool definitions, with a diff a tired reviewer can read. The
   removed. For a changed tool it prints a word-level description diff, schema properties
   added, removed or changed, and annotation hints that flipped, each with a risk level and a
   plain-language reason. It exits non-zero at or above `--fail-on`.
-- `approve <tool>` rewrites that tool's entry in the lock.
+- `approve <tool> <tools-list.json>` rewrites that tool's entry in the lock from the given
+  `tools/list` (or drops it if the list no longer has it).
 - Output is text, JSON, or the Agent Security Suite's agent inventory format (MCP servers as
   identities, drift as findings).
 

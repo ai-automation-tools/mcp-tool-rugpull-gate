@@ -2,6 +2,7 @@
 
 import { canonicalJson, hashDefinition, isObject, sortedKeys, type Json, type ToolDefinition } from "./canonical.ts";
 import type { ServerLock } from "./lockfile.ts";
+import { assessChange, assessNew, assessRemoved, highest, type Reason, type Risk } from "./risk.ts";
 
 export type Status = "unchanged" | "cosmetic-only" | "changed" | "new" | "removed";
 
@@ -18,7 +19,13 @@ export type ToolChanges = {
   annotations?: Change[];
 };
 
-export type ToolResult = { name: string; status: Status; changes?: ToolChanges };
+export type ToolResult = { name: string; status: Status; risk: Risk; reasons: Reason[]; changes?: ToolChanges };
+
+function result(name: string, status: Status, reasons: Reason[] = [], changes?: ToolChanges): ToolResult {
+  const r: ToolResult = { name, status, risk: highest(reasons.map((x) => x.level)), reasons };
+  if (changes) r.changes = changes;
+  return r;
+}
 
 /** Every leaf that differs between two JSON values, with its path. Objects are walked key by
  * key; anything else (arrays included) that differs is one change. */
@@ -111,18 +118,18 @@ export async function checkServer(lock: ServerLock, current: ToolDefinition[]): 
   for (const def of current) {
     const locked = Object.hasOwn(lock.tools, def.name) ? lock.tools[def.name] : undefined;
     if (!locked) {
-      results.push({ name: def.name, status: "new" });
+      results.push(result(def.name, "new", assessNew(def)));
     } else if ((await hashDefinition(def)) === locked.hash) {
-      results.push({ name: def.name, status: "unchanged" });
+      results.push(result(def.name, "unchanged"));
     } else {
       const changes = diffTool(locked.definition, def);
       // Cosmetic only when the title is provably the sole difference; anything else is "changed".
       const titleOnly = changes.title !== undefined && Object.keys(changes).length === 1;
-      results.push({ name: def.name, status: titleOnly ? "cosmetic-only" : "changed", changes });
+      results.push(result(def.name, titleOnly ? "cosmetic-only" : "changed", assessChange(locked.definition, def, changes), changes));
     }
   }
   for (const name of Object.keys(lock.tools)) {
-    if (!currentNames.has(name)) results.push({ name, status: "removed" });
+    if (!currentNames.has(name)) results.push(result(name, "removed", assessRemoved(name)));
   }
   return results.sort((p, q) => (p.name < q.name ? -1 : p.name > q.name ? 1 : 0));
 }

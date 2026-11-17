@@ -1,0 +1,4 @@
+[
+  {"jsonrpc": "2.0", "id": 2, "result": {"tools": [{"name": "list_tickets", "description": "List open tickets."}], "nextCursor": "page-2"}},
+  {"jsonrpc": "2.0", "id": 3, "result": {"tools": [{"name": "get_ticket", "description": "Fetch one ticket by its id."}]}}
+]

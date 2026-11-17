@@ -105,6 +105,14 @@ export function parseToolsList(text: string, label: string): ToolDefinition[] {
   try {
     doc = JSON.parse(text);
   } catch {
+    // Pages saved one after another (`cat page1.json page2.json`): say how to fix it.
+    // Three linear checks, not one regex: a [\s\S]* pair backtracks quadratically on hostile input.
+    const t = text.trim();
+    if (t.startsWith("{") && t.endsWith("}") && /\}\s*\{/.test(t)) {
+      throw new InputError(
+        `${label} is not valid JSON: it looks like several tools/list responses one after another; merge their tools into one "tools" list`,
+      );
+    }
     throw new InputError(`${label} is not valid JSON`);
   }
   if (Array.isArray(doc)) {
