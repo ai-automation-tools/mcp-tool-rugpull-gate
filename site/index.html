@@ -6,6 +6,7 @@
   <title>mcp-tool-rugpull-gate: see what changed in your MCP tools since you approved them</title>
   <meta name="description" content="Locks the MCP tool definitions a human approved and shows, in plain words, what changed since. Offline, no account.">
   <meta name="build" content="__BUILD_SHA__">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
     :root { color-scheme: dark; --bg: #060606; --surface: #0b0b0c; --line: #18181b; --fg: #fafafa; --mid: #a1a1aa; --dim: #71717a; --accent: #3b82f6; }
@@ -22,13 +23,24 @@
     .src-link       { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px; color: var(--mid); text-decoration: none; }
     .src-link:hover, .src-link:focus-visible { color: var(--fg); }
 
-    main { flex: 1; display: grid; place-items: center; padding: 48px 20px; }
-    .card { max-width: 600px; text-align: center; }
-    .card img { width: 64px; height: 64px; }
-    h1 { margin: 16px 0 8px; font-size: 28px; letter-spacing: -0.02em; }
+    main { flex: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+    header { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
+    header img { width: 48px; height: 48px; flex: none; }
+    h1 { margin: 0; font-size: 24px; letter-spacing: -0.02em; }
     p { margin: 0 0 12px; color: var(--mid); }
-    .soon { display: inline-block; margin-top: 8px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px;
-            background: var(--surface); color: var(--accent); font: 12px/1.6 "JetBrains Mono", ui-monospace, monospace; }
+    code, textarea, pre { font: 13px/1.5 "JetBrains Mono", ui-monospace, monospace; }
+    .banner { margin: 0 0 16px; padding: 12px 16px; border: 1px solid #7f1d1d; border-left: 4px solid #ef4444; border-radius: 8px;
+              background: #1c0a0a; color: #fecaca; white-space: pre-wrap; overflow-wrap: anywhere; font-weight: 600; }
+    .banner[data-risk="medium"] { border-color: #78350f; border-left-color: #f59e0b; background: #1c1407; color: #fde68a; }
+    .banner[data-risk="low"] { border-color: var(--line); border-left-color: var(--accent); background: var(--surface); color: var(--fg); }
+    .boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; color: var(--mid); font-size: 13px; }
+    textarea { width: 100%; height: 280px; padding: 12px; resize: vertical; border: 1px solid var(--line); border-radius: 8px;
+               background: var(--surface); color: var(--fg); }
+    textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    h2 { margin: 0 0 6px; color: var(--mid); font-size: 13px; font-weight: 400; }
+    pre { margin: 0; padding: 12px; min-height: 120px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+          white-space: pre-wrap; overflow-wrap: anywhere; }
   </style>
 </head>
 <body>
@@ -42,14 +54,27 @@
 </div>
 
 <main>
-  <div class="card">
+  <header>
     <img src="favicon.svg" alt="mcp-tool-rugpull-gate icon: a padlock">
     <h1>See what changed in your MCP tools since you approved them</h1>
-    <p>An MCP server can quietly change a tool's description, schema or hints after you approved it. mcp-tool-rugpull-gate locks the <code>tools/list</code> you approved into a file and, on every check, tells you in plain words what changed and which changes look risky. It reads files only: no server is started and nothing goes over the network.</p>
-    <p>This page will let you paste an approved and a current <code>tools/list</code> and see the diff, using the same engine as the CLI.</p>
-    <span class="soon">coming soon</span>
+  </header>
+  <p>Paste the <code>tools/list</code> response you approved on the left and today's on the right. The page runs the same engine as the <code>rugpull-gate</code> CLI and shows every tool as unchanged, cosmetic-only, changed, new or removed, with a risk level and the reason for it. The sample below is a fictional helpdesk server with one planted drift.</p>
+  <div id="banner" class="banner" role="status" hidden></div>
+  <div class="boxes">
+    <div>
+      <label for="approved">Approved <code>tools/list</code> (what you locked)</label>
+      <textarea id="approved" spellcheck="false" autocomplete="off"></textarea>
+    </div>
+    <div>
+      <label for="current">Current <code>tools/list</code> (what the server lists now)</label>
+      <textarea id="current" spellcheck="false" autocomplete="off"></textarea>
+    </div>
   </div>
+  <h2 id="report-label">What changed (the same text <code>rugpull-gate check</code> prints)</h2>
+  <pre id="report" aria-labelledby="report-label" aria-live="polite">Loading the engine...</pre>
+  <noscript><p>The diff runs in your browser and needs JavaScript.</p></noscript>
 </main>
+<script type="module" src="app.js"></script>
 
 </body>
 </html>

@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/now-slice_3:_browser_demo-F59E0B?style=for-the-badge" alt="Now: Slice 3, browser demo">
+  <img src="https://img.shields.io/badge/now-public_release-F59E0B?style=for-the-badge" alt="Now: public release">
   <img src="https://img.shields.io/badge/stage-incubating-2ea44f?style=for-the-badge" alt="Stage: incubating">
   <a href="README.md"><img src="https://img.shields.io/badge/↩-docs_home-6B7280?style=for-the-badge" alt="Back to docs"></a>
 </p>
@@ -41,9 +41,9 @@ this repo owns, with fictional servers; no item needs a running MCP server or ne
 
 - [x] **Risk reasons, approve and the inventory report** (MVP feature 2). Each change gets a risk level and a plain-English reason: a new tool is high; a description that gains an instruction with an address, a URL or an "always" directive is high; a new schema property implying an external destination (the `close_ticket` tool gaining `notify_webhook`) is high; `destructiveHint` false to true or `readOnlyHint` true to false is at least medium, and the reason names the flipped hint; a title-only change is none. `--fail-on <level>` exits 1 at or above that level and a title-only change never trips it. `rugpull-gate approve <tool>` rewrites that tool's lock entry and nothing else. `--format text|json|inventory`: the inventory output is an agent inventory document (schema v0.1, vendored to `schemas/agent-inventory.schema.json`) with each MCP server as an identity and each drift as a finding with `ruleId` `rugpull-gate/<rule>`, and a test validates it against the schema. Missing, empty, malformed-JSON and paginated-merged inputs each have a fixture and fail with a one-line message, never a stack trace. A test runs the CLI with `net`, `http`, `https` and `child_process` stubbed to throw and proves no socket or process is opened. — done 2026-11-17: risk rules with reasons in `src/risk.ts` (a firing and a non-firing fixture each in `tests/risk.test.ts`), `--fail-on`, `--format json|inventory` (`src/report.ts`, `src/inventory.ts`, schema vendored to `schemas/`, Ajv-validated in `tests/inventory.test.ts`) and `approve` in `src/cli.ts`; bad-input fixtures in `tests/fixtures/input-*.json`; the trapped-I/O run in `tests/no-io.test.ts`
 
-## 🖥️ Slice 3: Browser demo
+## 🖥️ Slice 3: Browser demo (done 2026-11-21)
 
-- [ ] **Paste-and-diff page** (MVP feature 3). `site/index.html` gets two paste boxes, approved and current `tools/list`, that run the same core as the CLI (imported as ES modules from the build, no copy of the engine) and render the diff with risk reasons. On first load, with no click, a sample with fictional servers fills both boxes and the planted `send_customer_email` drift shows as a banner at the top. A test loads the page's script with `fetch` and `XMLHttpRequest` stubbed to fail and proves the diff still renders and nothing is sent. `npm run build` writes the page to `_site/`, keeping the source bar, the favicon and the `__BUILD_SHA__` build-stamp meta tag.
+- [x] **Paste-and-diff page** (MVP feature 3). `site/index.html` gets two paste boxes, approved and current `tools/list`, that run the same core as the CLI (imported as ES modules from the build, no copy of the engine) and render the diff with risk reasons. On first load, with no click, a sample with fictional servers fills both boxes and the planted `send_customer_email` drift shows as a banner at the top. A test loads the page's script with `fetch` and `XMLHttpRequest` stubbed to fail and proves the diff still renders and nothing is sent. `npm run build` writes the page to `_site/`, keeping the source bar, the favicon and the `__BUILD_SHA__` build-stamp meta tag. — done 2026-11-21: paste boxes, banner and fictional sample in `site/index.html` and `site/app.js`, the compiled core copied into `_site/engine/` by `scripts/build-site.ts`, CSP `connect-src 'none'`, `tests/demo.test.ts` with `fetch`, `XMLHttpRequest` and `WebSocket` stubbed to fail
 
 ## 🚦 Public release
 
