@@ -34,8 +34,8 @@
 
 > [!WARNING]
 > **Early.** The CLI works: `lock`, `check` with risk levels and `--fail-on`, `approve`, and
-> text, JSON and inventory output. The browser demo is next. The [roadmap](docs/ROADMAP.md)
-> says what's left before release.
+> text, JSON and inventory output, and the browser demo runs from a local build (it goes live
+> with the Pages deploy). The [roadmap](docs/ROADMAP.md) says what's left before release.
 
 ## 🎯 What it's for
 
@@ -54,7 +54,10 @@ mcp-tool-rugpull-gate is a lock file for those definitions:
 | **`approve`** | Accepts one tool's new definition from a `tools/list` into the lock once a human has read the diff, and touches no other entry. |
 
 Output is text, JSON, or the Agent Security Suite's agent inventory format. The browser demo
-will run the same engine on two pasted `tools/list` blobs.
+runs the same engine on two pasted `tools/list` blobs: it opens on a fictional helpdesk server
+whose `send_customer_email` description has gained a BCC to an outside address, shown as a
+banner before you click anything. To try it locally, run `npm run build` and serve `_site/`
+with any static file server on `localhost` (browsers won't load ES modules from `file://`).
 
 ### What it won't do
 
@@ -133,17 +136,17 @@ so key order and JSON whitespace alone never show as a change.
 | Folder | What's inside |
 |:---|:---|
 | [**📚 docs/**](docs/README.md) | The roadmap, the changelog, the spec and build plan, and ADR-001. |
-| [**🧩 src/**](src/) | `cli.ts` (file I/O and exit codes) around a pure core (`canonical.ts`, `lockfile.ts`, `diff.ts`, `risk.ts`, `report.ts`, `inventory.ts`) that the browser demo will import too. |
+| [**🧩 src/**](src/) | `cli.ts` (file I/O and exit codes) around a pure core (`canonical.ts`, `lockfile.ts`, `diff.ts`, `risk.ts`, `report.ts`, `inventory.ts`) that the browser demo imports too. |
 | [**📐 schemas/**](schemas/) | The agent inventory schema v0.1, vendored from `ai-automation-tools.dev`. |
 | [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`. |
-| [**🖥️ site/**](site/) | The demo page and its favicon. A "coming soon" shell for now. |
+| [**🖥️ site/**](site/) | The demo page: `index.html`, `app.js` (the paste boxes, the banner and the sample, on the core's compiled modules) and the favicon. |
 
 ## 🛠️ Development
 
 ```bash
 npm run lint    # ESLint plus tsc --noEmit
 npm test        # node --test
-npm run build   # tsc to dist/
+npm run build   # tsc to dist/, then the demo to _site/ with the core copied into _site/engine/
 ```
 
 Agents working this repo read [AGENTS.md](AGENTS.md) first. Security reports go through

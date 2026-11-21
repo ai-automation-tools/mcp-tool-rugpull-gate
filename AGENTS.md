@@ -47,7 +47,10 @@ Full spec: `docs/product/spec.md`. Slice order: `docs/product/build-plan.md`. Wo
   codes. The core (`canonicalise`, `diff`, risk rules, output formatting) is pure functions
   that take parsed JSON and return data. **The core must not import Node built-ins**: the
   browser demo in `site/` imports it too (ADR-001). Hashing in the core uses Web Crypto
-  (`globalThis.crypto.subtle`), which Node and browsers both have.
+  (`globalThis.crypto.subtle`), which Node and browsers both have. `npm run build` copies the
+  compiled core from `dist/` into `_site/engine/` (`scripts/build-site.ts`, which fails on a
+  `node:` import); `site/app.js` imports it from there and is never a second copy of a rule.
+  Pasted text reaches the page as `value` or `textContent` only, never as HTML.
 - Runtime dependencies: at most a word-diff routine, and only if a few dozen lines of our own
   can't do it. A JSON Schema validator is a dev dependency for the inventory test.
 - Settings live in `.env` at the repo root, names in `.env.example`; the real environment
