@@ -69,17 +69,43 @@ with any static file server on `localhost` (browsers won't load ES modules from 
 
 ## 🚀 Quick start
 
-From a clone, with Node 22.18 or newer:
+It isn't on npm yet (v0.1 is published after release). Install it from a clone, with Node 22.18
+or newer:
 
 ```bash
-npm install            # dev dependencies only; no runtime dependencies
+npm ci                 # dev dependencies only; the CLI has no runtime dependencies
 npm run build          # compiles src/ to dist/
-node dist/cli.js lock tests/fixtures/helpdesk-v1.json --server fernhill-helpdesk
-node dist/cli.js check tests/fixtures/helpdesk-v2.json
+npm pack               # writes mcp-tool-rugpull-gate-0.0.0.tgz
+npm install --global ./mcp-tool-rugpull-gate-0.0.0.tgz   # puts rugpull-gate on your PATH
 ```
 
-`lock` writes `mcp-tools.lock.json` in the current folder (`--lock <path>` picks another). The
-input is a saved `tools/list` response: the JSON-RPC response, its `result`, or `{"tools": [...]}`.
+Then, from the clone, lock the fictional helpdesk fixture and check its planted drift:
+
+```bash
+rugpull-gate lock tests/fixtures/helpdesk-v1.json --server fernhill-helpdesk
+rugpull-gate check tests/fixtures/helpdesk-v2.json
+```
+
+(Without the global install, `node dist/cli.js` does the same as `rugpull-gate`.)
+
+| Command | |
+|:---|:---|
+| `rugpull-gate lock <tools-list.json> --server <id>` | Locks every tool in the file under server `<id>`. Replaces that server's entry and keeps any other server's. |
+| `rugpull-gate check <tools-list.json>` | Diffs the file against the lock and prints the report. |
+| `rugpull-gate approve <tool> <tools-list.json>` | Accepts one tool's definition into the lock, or drops it if the file no longer lists it. |
+
+| Flag | Applies to | What it does |
+|:---|:---|:---|
+| `--server <id>` | all three | The server's id in the lock. Required for `lock`; for `check` and `approve`, needed only when the lock holds more than one server. |
+| `--lock <path>` | all three | The lock file. Default `mcp-tools.lock.json` in the current folder. |
+| `--fail-on low\|medium\|high` | `check` | Exit 1 when any tool's risk is at or above this level. Default `low`. |
+| `--format text\|json\|inventory` | `check` | The report format. Default `text`. |
+| `--version`, `--help` | | Print the version or the usage. |
+
+Exit codes: 0 when nothing reached `--fail-on`, 1 when something did, 2 on bad input (a missing,
+empty, malformed or still-paginated `tools/list`, or a lock file that can't be verified).
+
+The input is a saved `tools/list` response: the JSON-RPC response, its `result`, or `{"tools": [...]}`.
 `check` against the fixture's planted drift prints:
 
 ```text
@@ -104,12 +130,11 @@ Server fernhill-helpdesk: 7 tools checked against mcp-tools.lock.json
 Summary: 1 unchanged, 1 cosmetic-only, 3 changed, 1 new, 1 removed; highest risk high
 ```
 
-`check` exits 1 when any tool's risk is at or above `--fail-on` (`low`, the default, `medium`
-or `high`), and 2 on bad input or a corrupt lock file. A title-only change is risk none and never
-trips it. `--format json` prints the same report as data, and `--format inventory` prints an
+That run exits 1: the highest risk is high, at or above the default `--fail-on low`. A
+title-only change is risk none and never trips `--fail-on`. `--format json` prints the same
+report as data, and `--format inventory` prints an
 [agent inventory](schemas/agent-inventory.schema.json) document (schema v0.1): the server as an
-identity, each risk reason as a finding with `ruleId` `rugpull-gate/<rule>`. One lock file can
-hold several servers; `check` and `approve` then need `--server <id>`.
+identity, each risk reason as a finding with `ruleId` `rugpull-gate/<rule>`.
 
 | Risk | When |
 |:---|:---|
@@ -121,7 +146,7 @@ hold several servers; `check` and `approve` then need `--server <id>`.
 Once you've read a diff and accept it, approve that one tool:
 
 ```bash
-node dist/cli.js approve close_ticket tests/fixtures/helpdesk-v2.json
+rugpull-gate approve close_ticket tests/fixtures/helpdesk-v2.json
 ```
 
 `approve` refuses a lock file it can't verify, like `lock` does. A tool the `tools/list` no longer
@@ -130,6 +155,19 @@ has is dropped from the lock.
 The hash covers name, title, description, `inputSchema`, `outputSchema` and annotations, with
 keys sorted and an absent, `null` or empty top-level field dropped (leanproxy PR 352's rules),
 so key order and JSON whitespace alone never show as a change.
+
+## 🛡️ Responsible use
+
+mcp-tool-rugpull-gate is a defensive tool. Run it on MCP servers you own or are authorized to
+review.
+
+- It never exploits anything. It reads two JSON files and compares them.
+- It never starts, connects to or probes a server. You save the `tools/list` response yourself.
+- It never writes to a server or to a client config such as `.mcp.json`. The only file it writes
+  is the lock file, and only when you run `lock` or `approve`.
+- It can't catch a tool that was already poisoned when you first locked it. A lock records what
+  you approved; read every definition before the first `lock`.
+- The demo's sample is a planted fixture on fictional servers. No real vendor's listing is in it.
 
 ## 🗂️ What's in here
 
@@ -148,6 +186,10 @@ npm run lint    # ESLint plus tsc --noEmit
 npm test        # node --test
 npm run build   # tsc to dist/, then the demo to _site/ with the core copied into _site/engine/
 ```
+
+CI runs those three on Ubuntu and Windows, then runs the built CLI's `check --format inventory`
+on the planted-drift fixture and fails unless `scripts/validate-inventory.ts` finds the output
+valid against the vendored schema and the `close_ticket` `notify_webhook` finding in it.
 
 Agents working this repo read [AGENTS.md](AGENTS.md) first. Security reports go through
 [SECURITY.md](SECURITY.md), not public issues.
