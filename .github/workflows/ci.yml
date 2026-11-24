@@ -42,3 +42,15 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # The built CLI's inventory output on the planted drift fixture must validate against
+      # the vendored agent inventory schema v0.1 and carry the notify_webhook finding.
+      # check exits 1 on that drift, so only exit 0 (no drift) or 2+ (bad input) fail here.
+      - name: Inventory output validates
+        shell: bash
+        run: |
+          node dist/cli.js lock tests/fixtures/helpdesk-v1.json --server fernhill-helpdesk --lock "$RUNNER_TEMP/mcp-tools.lock.json"
+          code=0
+          node dist/cli.js check tests/fixtures/helpdesk-v2.json --lock "$RUNNER_TEMP/mcp-tools.lock.json" --format inventory > "$RUNNER_TEMP/inventory.json" || code=$?
+          test "$code" -eq 1
+          node scripts/validate-inventory.ts "$RUNNER_TEMP/inventory.json"
