@@ -15,6 +15,8 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 ## Unreleased
 
+- `CLAUDE.md` is gone: Claude Code reads `AGENTS.md` directly.
+
 **Added**
 - Live demo at `https://ai-automation-tools.dev/mcp-tool-rugpull-gate/`: `.github/workflows/pages.yml` runs `npm run build` on every push to `main`, stamps the commit into `<meta name="build">` and deploys `_site/` to GitHub Pages. The README carries a Live Demo badge. *Public release*
 - CI step "Inventory output validates": the built CLI's `check --format inventory` on the planted-drift fixture must validate against the vendored agent inventory schema v0.1 and carry the `close_ticket` `notify_webhook` finding (`scripts/validate-inventory.ts`). *Public release*
