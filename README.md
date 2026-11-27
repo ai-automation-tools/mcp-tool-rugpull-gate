@@ -177,6 +177,7 @@ review.
 | [**🧩 src/**](src/) | `cli.ts` (file I/O and exit codes) around a pure core (`canonical.ts`, `lockfile.ts`, `diff.ts`, `risk.ts`, `report.ts`, `inventory.ts`) that the browser demo imports too. |
 | [**📐 schemas/**](schemas/) | The agent inventory schema v0.1, vendored from `ai-automation-tools.dev`. |
 | [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`. |
+| [**🤖 skills/**](skills/mcp-tool-rugpull-gate/SKILL.md) | An agent skill (Claude Code, Codex and others) that teaches an agent in any repo to install `rugpull-gate`, run `lock`, `check` and `approve`, and read the report. |
 | [**🖥️ site/**](site/) | The demo page: `index.html`, `app.js` (the paste boxes, the banner and the sample, on the core's compiled modules) and the favicon. |
 
 ## 🛠️ Development
