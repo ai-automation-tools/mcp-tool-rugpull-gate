@@ -21,6 +21,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/status-incubating-F59E0B?style=for-the-badge" alt="Status: incubating">
   <a href="docs/ROADMAP.md"><img src="https://img.shields.io/badge/plan-ROADMAP-8B5CF6?style=for-the-badge" alt="Roadmap"></a>
+  <a href="https://ai-automation-tools.dev/mcp-tool-rugpull-gate/"><img src="https://img.shields.io/badge/demo-live-2ea44f?style=for-the-badge" alt="Live Demo"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2ea44f?style=for-the-badge" alt="License: MIT"></a>
 </p>
 
