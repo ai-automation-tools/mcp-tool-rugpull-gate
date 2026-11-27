@@ -25,6 +25,7 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 **Docs**
 - README: status badge now active (was incubating), and the Live Demo badge links to `https://mcp-tool-rugpull-gate-demo.ai-automation-tools.dev/`.
 - ROADMAP: ticked the `-demo.` subdomain item, which the publish run already set up.
+- ROADMAP: added a Next slices item for risk rules that see through composed input schemas. MCP 2026-07-28 allows any JSON Schema 2020-12 keyword in `inputSchema`, and a destination property added behind `$ref` or `allOf` is rated low today, so it slips past `--fail-on medium`.
 - Agent skill `skills/mcp-tool-rugpull-gate/SKILL.md`: how an agent in any repo installs the CLI from source, feeds it a saved `tools/list`, runs `lock`, `check` and `approve`, reads the text, JSON and inventory output and the exit codes, gates CI, and why it never approves a change on its own. Linked from the README's folder table.
 - README Quick start installs from `npm pack`, lists every command and flag with exit codes, and its sample run was rechecked against the packed build. *Public release*
 - README `Responsible use` section: defensive only, servers you own or may review, never starts or connects to a server, writes only the lock file, can't catch a tool poisoned before the first lock, fictional demo data. *Public release*
