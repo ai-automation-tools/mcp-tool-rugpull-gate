@@ -74,7 +74,7 @@ Nothing below blocks go-live.
 - [ ] `small` Cross-link mcp-frisk in the README: frisk lints a config before first use, this tool watches the tools after you approve them.
 - [ ] `npm publish --dry-run` is clean, then tag v0.1 and publish to npm. 🔒 Needs owner
 - [ ] Launch post built on the demo ("paste yesterday's and today's `tools/list`, see what changed"), sent where agent-security practitioners read. 🔒 Needs owner
-- [ ] Custom subdomain `mcp-tool-rugpull-gate-demo.ai-automation-tools.dev`. 🔒 Needs owner
+- [x] Custom subdomain `mcp-tool-rugpull-gate-demo.ai-automation-tools.dev`. 🔒 Needs owner — done 2026-11-27: the publish run set it and enforced HTTPS; the old `ai-automation-tools.dev/mcp-tool-rugpull-gate/` path 301s to it
 - [ ] 90 days after the repo goes public, run the build plan's stop test: under 40 stars and no outside users means archive it. 🔒 Needs owner
 
 ### 💰 Revenue
