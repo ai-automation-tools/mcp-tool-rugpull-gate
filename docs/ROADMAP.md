@@ -67,6 +67,7 @@ Nothing below blocks go-live.
 - [ ] **Slice 6: a GitHub Action and SARIF.** `--format sarif` that GitHub code scanning accepts, and a composite Action that runs `check` on a repo's committed lock file. Tested in this repo's own CI.
 - [ ] **Slice 7: pin `initialize` instructions.** The server's `instructions` string is locked and diffed like a tool description.
 - [ ] **Slice 8: import leanproxy and Pipelock pin files** into `mcp-tools.lock.json`.
+- [ ] **Risk rules see through composed schemas.** MCP revision 2026-07-28 (SEP-2106) lets `inputSchema` use any JSON Schema 2020-12 keyword, but the `external-destination-property` rule reads only the top-level `properties`, so `close_ticket` gaining `notify_webhook` behind a local `$ref` into `$defs`, inside `allOf`, `anyOf` or `oneOf`, or in a nested object's `properties` is rated low (`input-schema-changed`) and passes `--fail-on medium`. The rule collects new properties from every place a 2020-12 schema can declare one, follows local `#/$defs/…` and `#/definitions/…` refs with a cycle guard and never fetches a remote one (a newly added remote `$ref` is a reason of its own, at least medium), and its reason names the property's path. The lock format and the hashed field set don't change. Done when each placement has a firing and a non-firing fixture in `tests/risk.test.ts`, a ref cycle gives a reason rather than a hang, and `check --fail-on high` exits 1 on each firing fixture (source: https://modelcontextprotocol.io/specification/2026-07-28/changelog, 2026-07-28)
 
 ### 📣 Publish and promote
 
@@ -74,7 +75,7 @@ Nothing below blocks go-live.
 - [ ] `small` Cross-link mcp-frisk in the README: frisk lints a config before first use, this tool watches the tools after you approve them.
 - [ ] `npm publish --dry-run` is clean, then tag v0.1 and publish to npm. 🔒 Needs owner
 - [ ] Launch post built on the demo ("paste yesterday's and today's `tools/list`, see what changed"), sent where agent-security practitioners read. 🔒 Needs owner
-- [ ] Custom subdomain `mcp-tool-rugpull-gate-demo.ai-automation-tools.dev`. 🔒 Needs owner
+- [x] Custom subdomain `mcp-tool-rugpull-gate-demo.ai-automation-tools.dev`. 🔒 Needs owner — done 2026-11-27: the publish run set it and enforced HTTPS; the old `ai-automation-tools.dev/mcp-tool-rugpull-gate/` path 301s to it
 - [ ] 90 days after the repo goes public, run the build plan's stop test: under 40 stars and no outside users means archive it. 🔒 Needs owner
 
 ### 💰 Revenue

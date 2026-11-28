@@ -15,6 +15,8 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 ## Unreleased
 
+- `CLAUDE.md` is gone: Claude Code reads `AGENTS.md` directly.
+
 **Added**
 - Live demo at `https://ai-automation-tools.dev/mcp-tool-rugpull-gate/`: `.github/workflows/pages.yml` runs `npm run build` on every push to `main`, stamps the commit into `<meta name="build">` and deploys `_site/` to GitHub Pages. The README carries a Live Demo badge. *Public release*
 - CI step "Inventory output validates": the built CLI's `check --format inventory` on the planted-drift fixture must validate against the vendored agent inventory schema v0.1 and carry the `close_ticket` `notify_webhook` finding (`scripts/validate-inventory.ts`). *Public release*
@@ -24,6 +26,9 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 **Docs**
 - `docs/UPSTREAMS.md` lists what the code assumes about MCP's `tools/list` and tool annotations, the vendored agent inventory schema, Node, the TypeScript pin and GitHub Pages and Actions; `.github/dependabot.yml` raises weekly minor and patch bumps for npm and GitHub Actions. The biweekly upstream check works from that list.
+- README: status badge now active (was incubating), and the Live Demo badge links to `https://mcp-tool-rugpull-gate-demo.ai-automation-tools.dev/`.
+- ROADMAP: ticked the `-demo.` subdomain item, which the publish run already set up.
+- ROADMAP: added a Next slices item for risk rules that see through composed input schemas. MCP 2026-07-28 allows any JSON Schema 2020-12 keyword in `inputSchema`, and a destination property added behind `$ref` or `allOf` is rated low today, so it slips past `--fail-on medium`.
 - Agent skill `skills/mcp-tool-rugpull-gate/SKILL.md`: how an agent in any repo installs the CLI from source, feeds it a saved `tools/list`, runs `lock`, `check` and `approve`, reads the text, JSON and inventory output and the exit codes, gates CI, and why it never approves a change on its own. Linked from the README's folder table.
 - README Quick start installs from `npm pack`, lists every command and flag with exit codes, and its sample run was rechecked against the packed build. *Public release*
 - README `Responsible use` section: defensive only, servers you own or may review, never starts or connects to a server, writes only the lock file, can't catch a tool poisoned before the first lock, fictional demo data. *Public release*
