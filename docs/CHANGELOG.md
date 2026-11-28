@@ -25,6 +25,7 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 - `rugpull-gate lock <tools-list.json> --server <id>` writes `mcp-tools.lock.json` (`lockVersion` 1) with each tool's SHA-256 and canonical definition, and refuses to overwrite a lock file it can't verify; `rugpull-gate check` reports every tool as unchanged, cosmetic-only, changed, new or removed, with a word-level description diff, schema paths added, removed or changed, and annotation values before and after, exiting 1 on drift and 2 on bad input. The canonical form follows leanproxy PR 352's field set and rules, and every rule has a firing and a non-firing test. CI now runs on Ubuntu and Windows. *Slice 1: Canonicalise, lock, diff*
 
 **Docs**
+- `docs/UPSTREAMS.md` lists what the code assumes about MCP's `tools/list` and tool annotations, the vendored agent inventory schema, Node, the TypeScript pin and GitHub Pages and Actions; `.github/dependabot.yml` raises weekly minor and patch bumps for npm and GitHub Actions. The biweekly upstream check works from that list.
 - README: status badge now active (was incubating), and the Live Demo badge links to `https://mcp-tool-rugpull-gate-demo.ai-automation-tools.dev/`.
 - ROADMAP: ticked the `-demo.` subdomain item, which the publish run already set up.
 - ROADMAP: added a Next slices item for risk rules that see through composed input schemas. MCP 2026-07-28 allows any JSON Schema 2020-12 keyword in `inputSchema`, and a destination property added behind `$ref` or `allOf` is rated low today, so it slips past `--fail-on medium`.
